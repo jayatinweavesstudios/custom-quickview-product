@@ -1,0 +1,82 @@
+<div class="quickview_popup">
+      <div class="quickview_pro_inner">
+        
+      </div>
+    </div>
+    <style>
+      .quickview_popup.active{
+          position: fixed;
+          z-index: 9;
+          width: 80%;
+          background: #fff;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%,-50%);
+          overflow-y: scroll;
+          max-height: 600px;
+      }
+      .quickview_popup .product__description{
+        display:none;
+      }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll(".custom-quickview").forEach((e) => {
+        e.addEventListener("click",function(evt){
+            var $gt_handle = evt.target.dataset.handle;
+            fetch(`/products/${$gt_handle}.json`).then((response)=>{
+                return response.json()
+            }).then((data) => {
+              var $product = data.product;
+              var variant_options = document.createElement("div");
+              variant_options.setAttribute("class",`main-options`);
+              $product.options.forEach((option) => {
+                var option_values = document.createElement("div");
+                option_values.setAttribute("class",`main-option-${option.name}`);
+                option.values.forEach((value,index) => {
+                  let label = document.createElement("label");
+                      label.innerText = value;
+                      label.setAttribute("for",`${index}-${value}`);
+                  let input = document.createElement("input");
+                  input.type = "radio";
+                  input.name = option.name;
+                  input.value = value;
+                  index? 0
+                  input.setAttribute("id",`${index}-${value}`);
+                  label.appendChild(input);
+                  option_values.appendChild(label);
+                })
+                var wrapper = document.createElement("div");
+                wrapper.appendChild(option_values);
+                var string_options = wrapper.innerHTML;
+                var radio_options = `
+                  <div class="option-${option.name}">
+                    <h6>${option.name}</h6>
+                    ${string_options}
+                  </div>
+                `;
+                variant_options.innerHTML += radio_options;
+              })
+              var options_wrapper = document.createElement("div");
+              options_wrapper.appendChild(variant_options);
+              var string_options_main = options_wrapper.innerHTML;
+              var $html = `
+                <div class="product-main">
+                  <div class="product-media">
+                    <img src="${$product.image.src}" alt="${$product.handle}">
+                  </div>
+                  <div class="pro-information">
+                    <h5>${$product.title}</h5>
+                    <p class="price"></p>
+                    ${string_options_main}
+                    <button type="button" data-id="">Add to cart</button>
+                  </div>
+                </div>
+                `;
+              document.querySelector(".quickview_popup .quickview_pro_inner").innerHTML = $html;
+              document.querySelector(".quickview_popup").classList.add("active");
+            })
+        })
+    })
+         })
+    </script>
